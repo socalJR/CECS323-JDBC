@@ -74,22 +74,35 @@ public class CECS323Jdbc {
             System.out.print("\nInput a group name: ");
             String groupName = in.nextLine();
             pstmt = conn.prepareStatement
-            ("SELECT * FROM WritingGroup WHERE groupName = ?");
+            ("SELECT GROUPNAME, BOOKTITLE, PUBLISHERNAME, YEARPUBLISHED, NUMBERPAGES, "
+           + "PUBLISHERADDRESS, PUBLISHERPHONE, PUBLISHEREMAIL, HEADWRITER, YEARFORMED, SUBJECT "
+           + "FROM WritingGroup INNER JOIN BOOKS using (GROUPNAME) INNER JOIN PUBLISHERS using (PUBLISHERNAME) WHERE groupName = ?");
             pstmt.setString(1, groupName);
             ResultSet rs = pstmt.executeQuery();
 
-            displayFormat = "%-30s%-30s%-30s%-30s\n";
-            System.out.printf(displayFormat, "Group Name", "Head Writer", "Year Formed", "Subject");
+            
+            displayFormat = "%-30s%-30s%-30s%-30s%-30s%-30s%-30s%-30s%-30s%-30s%-30s\n";
+            System.out.printf(displayFormat, "Group Name","Book Title", "Publisher Name", "Year Published", "Pages",
+                    "Publisher Address","Publisher Phone","Publisher Email","Head Writer", "Year Formed", "Subject");
             while (rs.next()) {
                 //Retrieve by column name
                 String name = rs.getString("groupName");
+                String title = rs.getString("bookTitle");
+                String publisher = rs.getString("publisherName");
+                String yearPub = rs.getString("yearPublished");
+                String pages = rs.getString("numberPages");
+                String addrPub = rs.getString("publisherAddress");
+                String phonePub = rs.getString("publisherPhone");
+                String emailPub = rs.getString("publisherEmail");
                 String head = rs.getString("headWriter");
                 String year = rs.getString("yearFormed");
                 String subject = rs.getString("subject");
 
                 //Display values
                 System.out.printf(displayFormat,
-                        dispNull(name), dispNull(head), dispNull(year), dispNull(subject));
+                        dispNull(name),dispNull(title), dispNull(publisher),dispNull(yearPub),
+                        dispNull(pages),dispNull(addrPub),dispNull(phonePub),dispNull(emailPub),
+                        dispNull(head), dispNull(year), dispNull(subject));
             }
 
             rs.close();
@@ -107,7 +120,8 @@ public class CECS323Jdbc {
             );
             ResultSet rs = pstmt.executeQuery();
 
-            System.out.println("Publisher Name");
+            System.out.println("\nPublisher Name");
+            System.out.println("--------------");
             while (rs.next()) {
                 //Retrieve by column name
                 String name = rs.getString("publisherName");
@@ -129,31 +143,40 @@ public class CECS323Jdbc {
             System.out.print("\nInput a publisher name: ");
             String publisherName = in.nextLine();
             pstmt = conn.prepareStatement(
-                "SELECT * FROM Publishers WHERE publisherName = ?");
+                "SELECT PUBLISHERNAME, PUBLISHERADDRESS, PUBLISHERPHONE,"
+                + "PUBLISHEREMAIL, BOOKTITLE, YEARPUBLISHED, NUMBERPAGES,"
+                + "GROUPNAME, HEADWRITER, YEARFORMED, SUBJECT FROM Publishers "
+                + "INNER JOIN BOOKS using (PUBLISHERNAME)"
+                + "INNER JOIN WRITINGGROUP using (GROUPNAME) WHERE publisherName = ?");
             pstmt.setString(1, publisherName);
             ResultSet rs = pstmt.executeQuery();
 
-            if(rs.getString("publisherName").isEmpty())
-            {
-                System.out.println("\n*** ERROR - INVALID PUBLISHER ***\n");
-            }
-            else{
-                
-            displayFormat = "%-30s%-30s%-30s%-30s\n";
-            System.out.printf(displayFormat, "Name", "Address", "Phone", "Email");
-            System.out.printf(displayFormat, "----", "-------", "-----", "-----");
-            
+            displayFormat = "%-30s%-35s%-30s%-30s%-35s%-25s%-25s%-35s%-30s%-25s%-35s\n";
+            System.out.printf(displayFormat, "Publisher", "Publisher Address", 
+                    "Publisher Phone", "Publisher Email", "Book Title", "Year Published", 
+                    "Pages", "Group Name", "HeadWriter", "Year Formed", "Subject");
+
+            boolean inside = false;
             while (rs.next()) {
+                inside = true;
                 //Retrieve by column name
                 String name = rs.getString("publisherName");
                 String address = rs.getString("publisherAddress");
                 String phone = rs.getString("publisherPhone");
                 String email = rs.getString("publisherEmail");
+                String title = rs.getString("bookTitle");
+                String yearPub = rs.getString("yearPublished");
+                String pages = rs.getString("numberPages");
+                String groupName = rs.getString("groupName");
+                String headwriter = rs.getString("headWriter");
+                String yearFormed = rs.getString("yearFormed");
+                String subject = rs.getString("subject");
 
                 //Display values
                 System.out.printf(displayFormat,
-                        dispNull(name), dispNull(address), dispNull(phone), dispNull(email));
-            }
+                        dispNull(name),dispNull(address), dispNull(phone),dispNull(email),
+                        dispNull(title),dispNull(yearPub),dispNull(pages),dispNull(groupName),
+                        dispNull(headwriter), dispNull(yearFormed), dispNull(subject));
             }
 
             rs.close();
@@ -197,7 +220,9 @@ public class CECS323Jdbc {
         System.out.println("5 : List all book titles");
         System.out.println("6 : List data for a particular book");
         System.out.println("7 : Insert a new book");
-        System.out.println("8 : Remove a book");
+        System.out.println("8 : Insert a new publisher");
+        System.out.println("9 : Remove a book");
+        
     }
     
     /**
@@ -245,18 +270,9 @@ public class CECS323Jdbc {
                     case "6":
                         //insertPublisher();
                 } 
-
-    //            if (INPUT.equals("3")){
-    //                System.out.println("Listing all publishers!");
-    //                listPublishers();
-    //            }
                 
             
             }
-            // TODO code application logic here
-            listAllGroups();
-            
-        listAllBooks();
         }catch (SQLException se) {
             // Handle errors for JDBC
             se.printStackTrace();
@@ -280,6 +296,5 @@ public class CECS323Jdbc {
             }// end finally try
         }// end try
         System.out.println("Goodbye!");      
-    }
-    
+    }   
 }
