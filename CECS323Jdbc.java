@@ -16,7 +16,7 @@ public class CECS323Jdbc {
     
      // Database credentials
     static String USER;
-    static String PASS;
+    static String PASSWORD;
     static String DBNAME;
     
     static String displayFormat;
@@ -24,7 +24,7 @@ public class CECS323Jdbc {
     static String DB_URL = "jdbc:derby://localhost:1527/";
     // + "testdb;user=";
     static Connection conn;
-    static String INPUT;
+    static String INPUT = "";
     static Scanner in;
     static PreparedStatement pstmt;
 
@@ -48,11 +48,11 @@ public class CECS323Jdbc {
     public static void listAllGroups()
     {
         try{
-            pstmt = conn.prepareStatement("SELECT groupName FROM WritingGroup");
+            pstmt = conn.prepareStatement("SELECT * FROM WritingGroup");
             
             ResultSet rs = pstmt.executeQuery();
             
-            System.out.println("Group Name");
+            System.out.println("\nGroup Name");
             System.out.println("----------");
             
             while(rs.next()){
@@ -71,11 +71,10 @@ public class CECS323Jdbc {
     //2
         public static void listSpecificGroup() {
         try {
-            System.out.println("Input a group name: ");
+            System.out.print("\nInput a group name: ");
             String groupName = in.nextLine();
-            pstmt = conn.prepareStatement(
-                    "SELECT * FROM WritingGroup WHERE groupName = ?"
-            );
+            pstmt = conn.prepareStatement
+            ("SELECT * FROM WritingGroup WHERE groupName = ?");
             pstmt.setString(1, groupName);
             ResultSet rs = pstmt.executeQuery();
 
@@ -127,14 +126,19 @@ public class CECS323Jdbc {
      // 4
     public static void listSpecificPublisher() {
         try {
-            System.out.println("Input a publisher name: ");
+            System.out.print("\nInput a publisher name: ");
             String publisherName = in.nextLine();
             pstmt = conn.prepareStatement(
-                "SELECT * FROM Publishers WHERE publisherName = ?"
-            );
+                "SELECT * FROM Publishers WHERE publisherName = ?");
             pstmt.setString(1, publisherName);
             ResultSet rs = pstmt.executeQuery();
 
+            if(rs.getString("publisherName").isEmpty())
+            {
+                System.out.println("\n*** ERROR - INVALID PUBLISHER ***\n");
+            }
+            else{
+                
             displayFormat = "%-30s%-30s%-30s%-30s\n";
             System.out.printf(displayFormat, "Name", "Address", "Phone", "Email");
             System.out.printf(displayFormat, "----", "-------", "-----", "-----");
@@ -149,6 +153,7 @@ public class CECS323Jdbc {
                 //Display values
                 System.out.printf(displayFormat,
                         dispNull(name), dispNull(address), dispNull(phone), dispNull(email));
+            }
             }
 
             rs.close();
@@ -166,7 +171,7 @@ public class CECS323Jdbc {
             );
             ResultSet rs = pstmt.executeQuery();
 
-            System.out.println("Book Title");
+            System.out.println("\nBook Title");
             System.out.println("----------");
             while (rs.next()) {
                 //Retrieve by column name
@@ -198,71 +203,68 @@ public class CECS323Jdbc {
     /**
      * @param args the command line arguments
      */
-        public static void main(String[] args) {
-        //Prompt the user for the database name, and the credentials.
-        //If your database has no credentials, you can update this code to
-        //remove that from the connection string.
-        Scanner in = new Scanner(System.in);
-        INPUT = "";
-               
+    public static void main(String[] args) 
+    {       
+        in = new Scanner(System.in);
         System.out.print("Name of the database (not the user account): ");
         DBNAME = in.nextLine();
         System.out.print("Database user name: ");
         USER = in.nextLine();
         System.out.print("Database password: ");
-        PASS = in.nextLine();
-        //Constructing the database URL connection string
-        DB_URL = DB_URL + DBNAME + ";user="+ USER + ";password=" + PASS;
-          //initialize the statement that we're using
-        try {
-            //STEP 2: Register JDBC driver
+        PASSWORD = in.nextLine();
+        // Constructing the database URL connection string
+        DB_URL = DB_URL + DBNAME + ";user=" + USER + ";password=" + PASSWORD;
+        conn = null; // initialize the connection
+        pstmt = null; // initialize the statement that we're using
+        
+        try{
+             // STEP 2: Register JDBC driver
             Class.forName("org.apache.derby.jdbc.ClientDriver");
 
-            //STEP 3: Open a connection
+            // STEP 3: Open a connection
             System.out.println("Connecting to database...");
+            conn = DriverManager.getConnection(DB_URL);
             
-  
-            
-            while(!INPUT.equals("q")){
-                
-                             
-            displayOptions();
-            System.out.print("Enter number: ");
-            INPUT = in.nextLine();
-            
-            switch(INPUT){
-                case "1": listAllGroups();
-                    break;
-                case "2": listSpecificGroup();
-                    break;
-                case "3": listAllPublishers();
-                    break;
-                case "4": listSpecificPublisher();
-                    break;
-                case "5": listAllBooks();
-                    break;
-                case "6":
-                    //insertPublisher();
-                    break;
-            } 
-           
-//            if (INPUT.equals("3")){
-//                System.out.println("Listing all publishers!");
-//                listPublishers();
-//            }
-                
-            
-        }
+            while(!INPUT.equals("q"))
+            {   
+                displayOptions();
+                System.out.print("Enter number choice: ");             
+                INPUT = in.nextLine();
 
-            conn.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
+                switch(INPUT){
+                    case "1": listAllGroups();
+                        break;
+                    case "2": listSpecificGroup();
+                        break;
+                    case "3": listAllPublishers();
+                        break;
+                    case "4": listSpecificPublisher();
+                        break;
+                    case "5": listAllBooks();
+                        break;
+                    case "6":
+                        //insertPublisher();
+                } 
+
+    //            if (INPUT.equals("3")){
+    //                System.out.println("Listing all publishers!");
+    //                listPublishers();
+    //            }
+                
+            
+            }
+            // TODO code application logic here
+            listAllGroups();
+            
+        listAllBooks();
+        }catch (SQLException se) {
+            // Handle errors for JDBC
             se.printStackTrace();
         } catch (Exception e) {
-            //Handle errors for Class.forName
+            // Handle errors for Class.forName
             e.printStackTrace();
         } finally {
-            //finally block used to close resources
+            // finally block used to close resources
             try {
                 if (pstmt != null) {
                     pstmt.close();
@@ -275,9 +277,9 @@ public class CECS323Jdbc {
                 }
             } catch (SQLException se) {
                 se.printStackTrace();
-            }//end finally try
-        }//end try
-        System.out.println("Goodbye!");
-    }//end main
+            }// end finally try
+        }// end try
+        System.out.println("Goodbye!");      
+    }
     
 }
