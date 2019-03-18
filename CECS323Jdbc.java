@@ -211,6 +211,139 @@ public class CECS323Jdbc {
         }
     }
     
+    // 6
+    public static void listBook() {
+        try {
+            System.out.println("Input a book title: ");
+            String bookTitle = in.nextLine();
+            pstmt = conn.prepareStatement(
+                    "SELECT * FROM Books NATURAL JOIN WritingGroup WHERE bookTitle = ?"
+            );
+            pstmt.setString(1, bookTitle);
+            ResultSet rs = pstmt.executeQuery();
+
+            displayFormat = "%-30s%-30s%-30s%-30s%-30s\n";
+            System.out.printf(displayFormat, "Title", "Year Published", "Number of Pages", "Group Name", "Publisher Name");
+            while (rs.next()) {
+                //Retrieve by column name
+                String title = rs.getString("bookTitle");
+                String year = rs.getString("yearPublished");
+                String pages = rs.getString("numberPages");
+                String group = rs.getString("groupName");
+                String publisher = rs.getString("publisherName");
+
+                //Display values
+                System.out.printf(displayFormat,
+                        dispNull(title), dispNull(year), dispNull(pages), dispNull(group), dispNull(publisher));
+            }
+
+            rs.close();
+            promptEnterKey();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // 7
+    public static void addBook() {
+        try {
+            System.out.println("Input book title: ");
+            String title = in.nextLine();
+            System.out.println("Input year published: ");
+            int year = in.nextInt();
+            in.nextLine();
+            System.out.println("Input number of pages: ");
+            int pages = in.nextInt();
+            in.nextLine();
+            System.out.println("Input group name: ");
+            String group = in.nextLine();
+            System.out.println("Input publisher name: ");
+            String publisher = in.nextLine();
+
+            pstmt = conn.prepareStatement(
+                    "INSERT INTO Books (bookTitle, yearPublished, numberPages, groupName, publisherName) VALUES (?, ?, ?, ?, ?)"
+            );
+            pstmt.setString(1, title);
+            pstmt.setInt(2, year);
+            pstmt.setInt(3, pages);
+            pstmt.setString(4, group);
+            pstmt.setString(5, publisher);
+            pstmt.executeUpdate();
+            
+            pstmt = conn.prepareStatement(
+                    "SELECT * FROM Books NATURAL JOIN WritingGroup WHERE bookTitle = ?"
+            );
+            pstmt.setString(1, title);
+            ResultSet rs = pstmt.executeQuery();
+
+            displayFormat = "%-30s%-30s%-30s%-30s%-30s\n";
+            System.out.printf(displayFormat, "Title", "Year Published", "Number of Pages", "Group Name", "Publisher Name");
+            while (rs.next()) {
+                //Retrieve by column name
+                String btitle = rs.getString("bookTitle");
+                String byear = rs.getString("yearPublished");
+                String bpages = rs.getString("numberPages");
+                String bgroup = rs.getString("groupName");
+                String bpublisher = rs.getString("publisherName");
+
+                //Display values
+                System.out.printf(displayFormat,
+                        dispNull(btitle), dispNull(byear), dispNull(bpages), dispNull(bgroup), dispNull(bpublisher));
+            }
+            rs.close();
+
+            System.out.println("Book has been added...");
+
+            promptEnterKey();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // 9
+    public static void removeBook() {
+        try {
+            System.out.println("Input book title to delete: ");
+            String title = in.nextLine();
+
+            pstmt = conn.prepareStatement(
+                    "DELETE FROM Books WHERE bookTitle = ?"
+            );
+            pstmt.setString(1, title);
+            pstmt.executeUpdate();
+
+            System.out.println("Book successfully removed...");
+            
+            pstmt = conn.prepareStatement(
+                    "SELECT bookTitle FROM Books"
+            );
+            ResultSet rs = pstmt.executeQuery();
+
+            System.out.println("Book Title");
+            
+            
+            while (rs.next()) {
+                //Retrieve by column name
+                String btitle = rs.getString("bookTitle");
+                
+
+                //Display values
+                System.out.println(btitle);
+                
+            }
+            
+
+            rs.close();
+            
+            System.out.println("Book has been removed...");
+
+            promptEnterKey();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
      public static void displayOptions(){
         System.out.println("What would you like to do?");
         System.out.println("1 : List all writing groups");
@@ -263,8 +396,12 @@ public class CECS323Jdbc {
                         break;
                     case "5": listAllBooks();
                         break;
-                    case "6":
-                        //insertPublisher();
+                    case "6": listBook();
+                        break;
+                    case "7": addBook();
+                        break;
+                    case "9": removeBook();
+                        break;
                 } 
                 
             
