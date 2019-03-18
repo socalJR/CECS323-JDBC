@@ -233,12 +233,8 @@ public class CECS323Jdbc {
         in = new Scanner(System.in);
         System.out.print("Name of the database (not the user account): ");
         DBNAME = in.nextLine();
-        System.out.print("Database user name: ");
-        USER = in.nextLine();
-        System.out.print("Database password: ");
-        PASSWORD = in.nextLine();
         // Constructing the database URL connection string
-        DB_URL = DB_URL + DBNAME + ";user=" + USER + ";password=" + PASSWORD;
+        DB_URL = DB_URL + DBNAME;
         conn = null; // initialize the connection
         pstmt = null; // initialize the statement that we're using
         
